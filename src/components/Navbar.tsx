@@ -5,6 +5,7 @@ import { Tabs, TabsList, TabsTrigger } from "../../components/ui/tabs";
 import { DEFAULT_GUEST_AVATAR, DEFAULT_HOST_AVATAR } from "../data/constants";
 import type { CurrencyCode } from "../lib/currency";
 import { Link } from "react-router-dom";
+import useAuth from "./hooks/useAuth";
 
 interface NavbarProps {
   activeTab: "location" | "planning";
@@ -35,19 +36,9 @@ export const Navbar: React.FC<NavbarProps> = ({
   onLogoutClick,
   currency,
 }) => {
+  const { data, isLoading } = useAuth();
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
-
-  // Close avatar dropdown on outside click
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setUserMenuOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
 
   const avatar =
     isLoggedIn && userName
@@ -59,6 +50,17 @@ export const Navbar: React.FC<NavbarProps> = ({
   //     : DEFAULT_GUEST_AVATAR;
   const displayName =
     isLoggedIn && userName ? userName : viewMode === "host" ? "Host" : "Guest";
+
+  // Close avatar dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setUserMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   return (
     <header className="sticky top-0 z-40 w-full border-b border-border bg-background/95 backdrop-blur-md transition-colors duration-300">
