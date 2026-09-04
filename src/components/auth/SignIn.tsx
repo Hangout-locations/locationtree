@@ -17,7 +17,7 @@ import { useQueryClient } from "@tanstack/react-query";
 interface AuthModalProps {
   screen: AuthScreen;
   setScreen: Dispatch<SetStateAction<AuthScreen>>;
-  onClose: () => void;
+  onClose?: () => void;
 }
 
 export const SignIn: React.FC<AuthModalProps> = ({
@@ -62,15 +62,20 @@ export const SignIn: React.FC<AuthModalProps> = ({
         password,
       })
       .then((res) => {
-        onClose();
-        console.log("login response", res.data);
+        // console.log("login response", res.data);
         sessionStorage.setItem("user_token", res.data?.accessToken);
-        sessionStorage.setItem("hangaut_user", res.data?.user);
+        sessionStorage.setItem("hangaut_user", JSON.stringify(res.data?.user));
         qc.invalidateQueries({ queryKey: ["me"] });
         toast.success("You are in, enjoy your session");
+        if (onClose) {
+          onClose();
+        }
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
       })
       .catch((err) => {
-        toast.success(
+        toast.error(
           err?.response?.data?.message || "Error logging in, try again",
         );
       })
@@ -93,8 +98,10 @@ export const SignIn: React.FC<AuthModalProps> = ({
   };
 
   const handleSuccessClick = () => {
-    onLoginSuccess(email || "guest@hangout.com");
-    onClose();
+    // onLoginSuccess(email || "guest@hangout.com");
+    if (onClose) {
+      onClose();
+    }
   };
 
   // Shift focus inside verification input blocks

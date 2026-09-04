@@ -15,6 +15,7 @@ import StepNine from "./host-property/StepNine";
 import StepTen from "./host-property/StepTen";
 import StepEleven from "./host-property/StepEleven";
 import StepTwelve from "./host-property/StepTwelve";
+import { adminCaller, formClient } from "../interceptors/http";
 
 interface BecomeHostWizardProps {
   onAddListing: (newListing: Listing) => void;
@@ -26,6 +27,7 @@ export const BecomeHostWizard: React.FC<BecomeHostWizardProps> = ({
   onAddListing,
 }) => {
   const [step, setStep] = useState<WizardStep>(1);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   // Form States
@@ -44,7 +46,7 @@ export const BecomeHostWizard: React.FC<BecomeHostWizardProps> = ({
   const [bookingSetting, setBookingSetting] = useState<
     "approve-first" | "instant"
   >("approve-first");
-  const [basePrice, setBasePrice] = useState<number>(75);
+  const [basePrice, setBasePrice] = useState<number>(0);
   const [priceMode, setPriceMode] = useState<PriceMode>("person");
   const [amenities, setAmenities] = useState<Set<string>>(new Set());
 
@@ -69,42 +71,39 @@ export const BecomeHostWizard: React.FC<BecomeHostWizardProps> = ({
   };
 
   const handleSubmit = () => {
+    setLoading(true);
     // Normalize location to match valid listing locations
-    const normalizedLocation = ([
-      "Lekki",
-      "Surulere",
-      "Lagos",
-      "Uyo",
-      "Enugu",
-    ].find((loc) => loc.toLowerCase() === location.trim().toLowerCase()) ||
-      "Lagos") as "Lekki" | "Lagos" | "Surulere" | "Enugu" | "Uyo";
+    // const normalizedLocation = ([
+    //   "Lekki",
+    //   "Surulere",
+    //   "Lagos",
+    //   "Uyo",
+    //   "Enugu",
+    // ].find((loc) => loc.toLowerCase() === location.trim().toLowerCase()) ||
+    //   "Lagos") as "Lekki" | "Lagos" | "Surulere" | "Enugu" | "Uyo";
 
     // Mock create a new listing object
     const finalTitle = title.trim() || `Charming ${category} Stay`;
 
-    const newListing: Listing = {
-      id: `mock-listing-${Date.now()}`,
-      title: finalTitle,
-      location: normalizedLocation,
-      price: basePrice, // was: 150 + Math.floor(Math.random() * 200)
-      priceUnit: priceMode,
-      rating: 5.0,
-      reviewsCount: 1,
-      images: photos.slice(0, 2),
-      category: category,
-      guestsCount: guests,
-      bedroomsCount: bedrooms,
-      bedsCount: beds,
-      hostingType: "property",
-      priceMode,
-      description,
-      amenities: [...amenities],
-      isOwnedByUser: true,
-    };
-
-    onAddListing(newListing);
-    alert("Congratulations! Your place is successfully listed on Hangout.");
-    navigate("/");
+    formClient
+      .post("/parties", {
+        title,
+        description,
+        location,
+        images: photos,
+        bedrooms,
+        beds,
+        bathrooms,
+        guest_capacity: guests,
+        price: basePrice,
+        price_unit: priceMode,
+        amenities,
+      })
+      .then(() => {})
+      .catch((err) => {})
+      .finally(() => {
+        setLoading(false);
+      });
   };
 
   // Check step validation
@@ -253,7 +252,7 @@ export const BecomeHostWizard: React.FC<BecomeHostWizardProps> = ({
           <button
             type="button"
             onClick={handleNext}
-            disabled={!isStepValid()}
+            disabled={!isStepValid() || loading}
             className="rounded-full bg-purple-950 hover:bg-purple-900 dark:bg-purple-800 dark:hover:bg-purple-750 text-white font-bold py-3 px-6 text-sm shadow-md active:scale-97 transition-[transform,background-color] duration-160 ease-out disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
           >
             {step === 12 ? "Publish" : "Next"}

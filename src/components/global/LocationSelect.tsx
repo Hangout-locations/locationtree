@@ -172,9 +172,11 @@ const LocationSelect: React.FC<LocationSelectProps> = ({
   return (
     <div className={`space-y-1.5 ${className}`} ref={dropdownRef}>
       {/* Label */}
-      <span className="text-xs capitalize font-medium tracking-wider text-muted-foreground/80">
-        {label ?? getDefaultLabel()}
-      </span>
+      {label && (
+        <span className="text-xs capitalize font-medium tracking-wider text-muted-foreground/80">
+          {label ?? getDefaultLabel()}
+        </span>
+      )}
 
       <div className="relative">
         {/* Trigger Button */}

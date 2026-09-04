@@ -71,23 +71,11 @@ const PartyStepTwo: React.FC<IStepProps> = ({
           {/* Start Date */}
           <div
             onClick={() => openDatePicker(startDateRef)}
-            className="
-              flex items-center gap-3
-              border border-border/80
-              bg-card
-              rounded-2xl
-              px-4 py-3
-              transition-all
-              hover:border-purple-500
-              focus-within:border-purple-600
-              focus-within:ring-2
-              focus-within:ring-purple-600/10
-              cursor-pointer
-            "
+            className="flex items-center gap-3 border border-border/80 bg-card rounded-2xl px-4 py-3 transition-all hover:border-purple-500 focus-within:border-purple-600 focus-within:ring-2 focus-within:ring-purple-600/10 cursor-pointer"
           >
-            <CalendarDays className="h-5 w-5 text-muted-foreground shrink-0" />
+            <CalendarDays className="h-7 w-7 text-muted-foreground shrink-0" />
 
-            <div className="flex flex-col w-full">
+            <div className="flex flex-col w-full relative">
               <span className="text-[10px] font-semibold uppercase text-muted-foreground">
                 Start date
               </span>
@@ -100,54 +88,29 @@ const PartyStepTwo: React.FC<IStepProps> = ({
                 value={startDate}
                 onChange={(e) => {
                   const newStartDate = e.target.value;
-
                   setStartDate(newStartDate);
-
-                  /**
-                   * Clear end date if it is no longer valid
-                   */
                   if (endDate && endDate <= newStartDate) {
                     setEndDate("");
                   }
                 }}
                 onClick={(e) => e.stopPropagation()}
-                className="
-                  w-full
-                  bg-transparent
-                  text-sm
-                  font-semibold
-                  text-foreground
-                  outline-none
-                  border-none
-                  p-0
-                  focus:ring-0
-                  cursor-pointer
-                  [color-scheme:light_dark]
-                "
+                className="w-full invisible absolute inset-0 z-10 bg-transparent text-sm font-semibold text-foreground outline-none border-none p-0 focus:ring-0 cursor-pointer scheme-light-dark"
               />
+
+              <span className="w-full p-0 text-sm font-semibold">
+                {startDate ? startDate : "Select date"}
+              </span>
             </div>
           </div>
 
           {/* End Date */}
           <div
             onClick={() => openDatePicker(endDateRef)}
-            className="
-              flex items-center gap-3
-              border border-border/80
-              bg-card
-              rounded-2xl
-              px-4 py-3
-              transition-all
-              hover:border-purple-500
-              focus-within:border-purple-600
-              focus-within:ring-2
-              focus-within:ring-purple-600/10
-              cursor-pointer
-            "
+            className="flex items-center gap-3 border border-border/80 bg-card rounded-2xl px-4 py-3 transition-all hover:border-purple-500 focus-within:border-purple-600 focus-within:ring-2 focus-within:ring-purple-600/10 cursor-pointer"
           >
-            <CalendarDays className="h-5 w-5 text-muted-foreground shrink-0" />
+            <CalendarDays className="h-7 w-7 text-muted-foreground shrink-0" />
 
-            <div className="flex flex-col w-full">
+            <div className="flex flex-col w-full relative">
               <span className="text-[10px] font-semibold uppercase text-muted-foreground">
                 End date
               </span>
@@ -160,20 +123,11 @@ const PartyStepTwo: React.FC<IStepProps> = ({
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
                 onClick={(e) => e.stopPropagation()}
-                className="
-                  w-full
-                  bg-transparent
-                  text-sm
-                  font-semibold
-                  text-foreground
-                  outline-none
-                  border-none
-                  p-0
-                  focus:ring-0
-                  cursor-pointer
-                  [color-scheme:light_dark]
-                "
+                className="w-full invisible absolute inset-0 z-10 bg-transparent text-sm font-semibold text-foreground outline-none border-none p-0 focus:ring-0 cursor-pointer scheme-light-dark"
               />
+              <span className="w-full p-0 text-sm font-semibold">
+                {endDate ? endDate : "Select date"}
+              </span>
             </div>
           </div>
         </div>

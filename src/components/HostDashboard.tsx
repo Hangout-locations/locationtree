@@ -1,26 +1,19 @@
 import {
   Briefcase,
   CalendarDays,
-  Home,
   LogOut,
-  PartyPopper,
-  Pencil,
-  Plus,
-  SaveAll,
-  Trash2,
   User,
   Wallet as WalletIcon,
 } from "lucide-react";
 import type React from "react";
 import { useState } from "react";
-import { DEFAULT_HOST_AVATAR } from "../data/constants";
 import type { HostProfile, Listing, WalletTransaction } from "../types/listing";
 import { ListingEditor } from "./ListingEditor";
 import { WalletView } from "./WalletView";
-import { Link } from "react-router-dom";
-import PhoneInput from "./global/PhoneInput";
-import LocationSelect from "./global/LocationSelect";
 import { HostProfilePage } from "./HostProfile";
+import AppLayout from "./layout/AppLayout";
+import MyListings from "./MyListings";
+import NotSignedInWrapper from "./auth/NotSignedInWrapper";
 
 interface HostDashboardProps {
   profile: HostProfile;
@@ -34,24 +27,20 @@ interface HostDashboardProps {
   onSaveListing: (listing: Listing) => void;
   onDeposit: (amount: number) => void;
   onWithdraw: (amount: number) => void;
-  onLogout: () => void;
 }
 
 type Section = "profile" | "listings" | "wallet";
 
 export const HostDashboard: React.FC<HostDashboardProps> = ({
   profile,
-  listings,
   hostBalance,
   guestBalance,
   transactions,
   currency,
   onUpdateProfile,
-  onDeleteListing,
   onSaveListing,
   onDeposit,
   onWithdraw,
-  onLogout,
 }) => {
   const [section, setSection] = useState<Section>("profile");
   const [editing, setEditing] = useState<null | {
@@ -59,222 +48,96 @@ export const HostDashboard: React.FC<HostDashboardProps> = ({
     mode: "party" | "property";
   }>(null);
 
-  const partyListings = listings.filter((l) => l.hostingType === "party");
-  const propertyListings = listings.filter((l) => l.hostingType !== "party");
-
   return (
-    <div className="mx-auto max-w-5xl px-4 md:px-8 py-8 space-y-8">
-      {/* Heading */}
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="h-12 w-12 rounded-2xl bg-purple-950/10 text-purple-950 dark:text-purple-300 flex items-center justify-center">
-            <Briefcase className="h-6 w-6" />
+    <AppLayout>
+      <div className="mx-auto max-w-5xl px-4 md:px-8 py-8 space-y-8">
+        {/* Heading */}
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="h-12 w-12 rounded-2xl bg-purple-950/10 text-purple-950 dark:text-purple-300 flex items-center justify-center">
+              <Briefcase className="h-6 w-6" />
+            </div>
+            <div>
+              <h1 className="text-xl font-semibold text-foreground tracking-tight">
+                Host dashboard
+              </h1>
+              <p className="text-xs text-muted-foreground">
+                Manage your profile, listings and earnings.
+              </p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-xl font-semibold text-foreground tracking-tight">
-              Host dashboard
-            </h1>
-            <p className="text-xs text-muted-foreground">
-              Manage your profile, listings and earnings.
-            </p>
-          </div>
+          <button
+            // onClick={onLogout}
+            className="flex items-center gap-2 rounded-full border border-border px-5 py-2.5 text-sm font-semibold text-foreground hover:bg-muted transition-colors cursor-pointer"
+          >
+            <LogOut className="h-4 w-4" />
+            <span>Log out</span>
+          </button>
         </div>
-        <button
-          onClick={onLogout}
-          className="flex items-center gap-2 rounded-full border border-border px-5 py-2.5 text-sm font-semibold text-foreground hover:bg-muted transition-colors cursor-pointer"
-        >
-          <LogOut className="h-4 w-4" />
-          <span>Log out</span>
-        </button>
-      </div>
 
-      {/* Section tabs */}
-      <div className="flex items-center gap-2 border-b border-border/60 pb-4 overflow-x-auto">
-        {(
-          [
-            { id: "profile", label: "Profile", icon: User },
-            { id: "listings", label: "My listings", icon: CalendarDays },
-            { id: "wallet", label: "Wallet", icon: WalletIcon },
-          ] as const
-        ).map((t) => {
-          const Icon = t.icon;
-          return (
-            <button
-              key={t.id}
-              onClick={() => setSection(t.id)}
-              className={`flex items-center gap-1.5 rounded-full px-5 py-2.5 text-sm font-medium transition-all cursor-pointer ${
-                section === t.id
-                  ? "bg-purple-950 text-white dark:bg-purple-800"
-                  : "bg-muted/15 text-purple-950 dark:text-purple-300 hover:bg-muted/30"
-              }`}
-            >
-              <Icon className="h-4 w-4" />
-              <span>{t.label}</span>
-            </button>
-          );
-        })}
-      </div>
-
-      {/* PROFILE SECTION */}
-      {section === "profile" && (
-        <HostProfilePage profile={profile} onUpdateProfile={onUpdateProfile} />
-      )}
-
-      {/* LISTINGS SECTION */}
-      {section === "listings" && (
-        <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-200 ease-out">
-          {/* Add new */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Link to="/become-a-host/party" className="w-full flex">
-              <button className="w-full group flex items-center gap-4 rounded-3xl border border-border bg-card p-6 text-left hover:border-purple-950/40 hover:shadow-md transition-all cursor-pointer">
-                <div className="h-12 w-12 rounded-2xl bg-purple-950/10 text-purple-950 dark:text-purple-300 flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <PartyPopper className="h-6 w-6" />
-                </div>
-                <div className="flex-1">
-                  <p className="text-base font-semibold text-foreground">
-                    Host a new party
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    Add a new party listing
-                  </p>
-                </div>
-                <Plus className="h-5 w-5 text-muted-foreground" />
+        {/* Section tabs */}
+        <div className="flex items-center gap-2 border-b border-border/60 pb-4 overflow-x-auto">
+          {(
+            [
+              { id: "profile", label: "Profile", icon: User },
+              { id: "listings", label: "My listings", icon: CalendarDays },
+              { id: "wallet", label: "Wallet", icon: WalletIcon },
+            ] as const
+          ).map((t) => {
+            const Icon = t.icon;
+            return (
+              <button
+                key={t.id}
+                onClick={() => setSection(t.id)}
+                className={`flex items-center gap-1.5 rounded-full px-5 py-2.5 text-sm font-medium transition-all cursor-pointer ${
+                  section === t.id
+                    ? "bg-purple-950 text-white dark:bg-purple-800"
+                    : "bg-muted/15 text-purple-950 dark:text-purple-300 hover:bg-muted/30"
+                }`}
+              >
+                <Icon className="h-4 w-4" />
+                <span>{t.label}</span>
               </button>
-            </Link>
+            );
+          })}
+        </div>
 
-            <Link to="/become-a-host/property" className="w-full flex">
-              <button className="w-full group flex items-center gap-4 rounded-3xl border border-border bg-card p-6 text-left hover:border-purple-950/40 hover:shadow-md transition-all cursor-pointer">
-                <div className="h-12 w-12 rounded-2xl bg-purple-950/10 text-purple-950 dark:text-purple-300 flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <Home className="h-6 w-6" />
-                </div>
-                <div className="flex-1">
-                  <p className="text-base font-semibold text-foreground">
-                    List a new property
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    Add a place / spot for events
-                  </p>
-                </div>
-                <Plus className="h-5 w-5 text-muted-foreground" />
-              </button>
-            </Link>
-          </div>
-
-          {listings.length === 0 ? (
-            <div className="rounded-3xl border border-dashed border-border bg-card p-10 text-center">
-              <CalendarDays className="h-8 w-8 text-muted-foreground mx-auto mb-3" />
-              <p className="text-sm font-semibold text-foreground">
-                You have no listings yet
-              </p>
-              <p className="text-xs text-muted-foreground mt-1">
-                Add a party or property to start earning.
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-8">
-              {partyListings.length > 0 && (
-                <div className="space-y-3">
-                  <p className="text-sm font-semibold text-foreground uppercase tracking-wider">
-                    Your parties
-                  </p>
-                  {partyListings.map((l) => (
-                    <ListingRow
-                      key={l.id}
-                      listing={l}
-                      onEdit={() => setEditing({ listing: l, mode: "party" })}
-                      onDelete={() => onDeleteListing(l.id)}
-                    />
-                  ))}
-                </div>
-              )}
-              {propertyListings.length > 0 && (
-                <div className="space-y-3">
-                  <p className="text-sm font-semibold text-foreground uppercase tracking-wider">
-                    Your properties
-                  </p>
-                  {propertyListings.map((l) => (
-                    <ListingRow
-                      key={l.id}
-                      listing={l}
-                      onEdit={() =>
-                        setEditing({ listing: l, mode: "property" })
-                      }
-                      onDelete={() => onDeleteListing(l.id)}
-                    />
-                  ))}
-                </div>
-              )}
-            </div>
+        <NotSignedInWrapper>
+          {/* PROFILE SECTION */}
+          {section === "profile" && (
+            <HostProfilePage
+              profile={profile}
+              onUpdateProfile={onUpdateProfile}
+            />
           )}
-        </div>
-      )}
 
-      {/* WALLET SECTION */}
-      {section === "wallet" && (
-        <WalletView
-          mode="host"
-          hostBalance={hostBalance}
-          guestBalance={guestBalance}
-          transactions={transactions}
-          onDeposit={onDeposit}
-          onWithdraw={onWithdraw}
-          currency={currency}
-        />
-      )}
+          {/* LISTINGS SECTION */}
+          {section === "listings" && <MyListings />}
 
-      {editing && (
-        <ListingEditor
-          isOpen
-          mode={editing.mode}
-          listing={editing.listing}
-          onClose={() => setEditing(null)}
-          onSave={onSaveListing}
-        />
-      )}
-    </div>
-  );
-};
+          {/* WALLET SECTION */}
+          {section === "wallet" && (
+            <WalletView
+              mode="host"
+              hostBalance={hostBalance}
+              guestBalance={guestBalance}
+              transactions={transactions}
+              onDeposit={onDeposit}
+              onWithdraw={onWithdraw}
+              currency={currency}
+            />
+          )}
 
-const ListingRow: React.FC<{
-  listing: Listing;
-  onEdit: () => void;
-  onDelete: () => void;
-}> = ({ listing, onEdit, onDelete }) => {
-  return (
-    <div className="flex items-center gap-4 rounded-3xl border border-border bg-card p-4">
-      <img
-        src={listing.images[0]}
-        alt={listing.title}
-        className="h-16 w-16 rounded-2xl object-cover shrink-0"
-      />
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-semibold text-foreground truncate">
-          {listing.title}
-        </p>
-        <p className="text-[11px] text-muted-foreground">
-          {listing.location} · {listing.guestsCount} guests · ${listing.price}/
-          {listing.priceUnit}
-          {listing.hostingType === "party" &&
-          listing.startDate &&
-          listing.endDate
-            ? ` · ${listing.startDate} → ${listing.endDate}`
-            : ""}
-        </p>
+          {editing && (
+            <ListingEditor
+              isOpen
+              mode={editing.mode}
+              listing={editing.listing}
+              onClose={() => setEditing(null)}
+              onSave={onSaveListing}
+            />
+          )}
+        </NotSignedInWrapper>
       </div>
-      <button
-        onClick={onEdit}
-        className="flex h-10 w-10 items-center justify-center rounded-full border border-border hover:bg-muted transition-colors cursor-pointer"
-        aria-label="Edit listing"
-      >
-        <Pencil className="h-4 w-4 text-foreground" />
-      </button>
-      <button
-        onClick={onDelete}
-        className="flex h-10 w-10 items-center justify-center rounded-full border border-border text-red-500 hover:bg-red-50 transition-colors cursor-pointer"
-        aria-label="Delete listing"
-      >
-        <Trash2 className="h-4 w-4" />
-      </button>
-    </div>
+    </AppLayout>
   );
 };

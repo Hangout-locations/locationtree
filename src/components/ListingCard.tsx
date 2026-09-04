@@ -201,7 +201,7 @@ export const ListingCard: React.FC<ListingCardProps> = ({
           </div>
 
           {/* Title */}
-          <h3 className="mt-2 text-base font-medium text-purple-950 dark:text-purple-300 line-clamp-1 group-hover:text-purple-700 dark:group-hover:text-purple-400 transition-colors">
+          <h3 className="mt-2 text-sm font-medium text-purple-950 dark:text-purple-300 line-clamp-1 group-hover:text-purple-700 dark:group-hover:text-purple-400 transition-colors">
             {listing.title}
           </h3>
 
@@ -216,10 +216,10 @@ export const ListingCard: React.FC<ListingCardProps> = ({
           {/* Price and Action button */}
           <div className="flex items-baseline justify-between mt-auto">
             <div className="flex items-center gap-1">
-              <h1 className="text-lg font-medium text-foreground">
+              <h1 className="font-medium text-foreground">
                 {formatPrice(displayPrice(listing.price, currency), currency)}
               </h1>
-              <span className="text-sm text-muted-foreground">
+              <span className="text-xs text-muted-foreground">
                 {" "}
                 / {listing.priceUnit}
               </span>

@@ -1,55 +1,56 @@
-import { Briefcase, LogIn, Menu, User } from "lucide-react";
+import {
+  Briefcase,
+  Calendar,
+  Globe,
+  Home,
+  LogIn,
+  Menu,
+  PartyPopper,
+  User,
+} from "lucide-react";
 import type React from "react";
 import { useEffect, useRef, useState } from "react";
 import { Tabs, TabsList, TabsTrigger } from "../../components/ui/tabs";
-import { DEFAULT_GUEST_AVATAR, DEFAULT_HOST_AVATAR } from "../data/constants";
+// import { DEFAULT_GUEST_AVATAR, DEFAULT_HOST_AVATAR } from "../data/constants";
 import type { CurrencyCode } from "../lib/currency";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import useAuth from "./hooks/useAuth";
+import useAppContext from "./hooks/useAppContext";
+import { AllIcon, HomeIcon, PartiesIcon } from "./svgs";
 
 interface NavbarProps {
-  activeTab: "location" | "planning";
-  setActiveTab: (tab: "location" | "planning") => void;
-  onLoginClick: () => void;
-  isLoggedIn: boolean;
-  userName: string;
-  viewMode: "guest" | "host";
-  onSwitchView: (mode: "guest" | "host") => void;
-  onBecomeHostClick: () => void;
-  onMenuClick: () => void;
-  onProfileClick: () => void;
-  onLogoutClick: () => void;
-  currency: CurrencyCode;
+  currency?: CurrencyCode;
 }
 
-export const Navbar: React.FC<NavbarProps> = ({
-  activeTab,
-  setActiveTab,
-  onLoginClick,
-  isLoggedIn,
-  userName,
-  viewMode,
-  onSwitchView,
-  onBecomeHostClick,
-  onMenuClick,
-  onProfileClick,
-  onLogoutClick,
-  currency,
-}) => {
+export const Navbar: React.FC<NavbarProps> = ({ currency = "NGN" }) => {
   const { data, isLoading } = useAuth();
+  const { setIsAuthModal } = useAppContext();
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [isActive, setIsActive] = useState<"all" | "homes" | "parties">("all");
   const menuRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
+  const location = window.location.pathname;
+
+  const tabs = ["all", "parties", "homes"] as const;
+
+  type ActiveTab = (typeof tabs)[number];
+
+  const handleSetActive = (link: "all" | "homes" | "parties") => {
+    navigate(link === "all" ? "/" : `/${link}`);
+    setIsActive(link);
+  };
 
   const avatar =
-    isLoggedIn && userName
-      ? userName.split(" ")[0][0] + userName.split(" ")[0][1]
+    data && data?.firstName
+      ? data?.firstName.split(" ")[0][0] + data?.lastName.split(" ")[0][0]
       : "G";
-  // const avatar =
-  //   viewMode === "host" && isLoggedIn
-  //     ? DEFAULT_HOST_AVATAR
-  //     : DEFAULT_GUEST_AVATAR;
+
   const displayName =
-    isLoggedIn && userName ? userName : viewMode === "host" ? "Host" : "Guest";
+    data && data?.firstName
+      ? data?.firstName
+      : location.includes("host")
+        ? "Host"
+        : "Guest";
 
   // Close avatar dropdown on outside click
   useEffect(() => {
@@ -62,29 +63,46 @@ export const Navbar: React.FC<NavbarProps> = ({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  useEffect(() => {
+    if (isActive !== "all" && location === "/") {
+      setIsActive("all");
+    }
+  }, [isActive]);
+
+  // Hydrate the local state with the current location
+  useEffect(() => {
+    const matchedTab = tabs.find((tab) => location.includes(tab));
+
+    if (matchedTab) {
+      setIsActive(matchedTab);
+    } else {
+      setIsActive("all");
+    }
+  }, [location]);
+
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-border bg-background/95 backdrop-blur-md transition-colors duration-300">
-      <div className="mx-auto flex flex-col md:flex-row md:h-20 max-w-7xl items-center justify-between px-4 md:px-8 py-4 md:py-0 gap-4 md:gap-0">
+    <header className="sticky  top-0 z-40 w-full border-b border-border bg-purple-50/60 backdrop-blur-md transition-colors duration-300">
+      <div className="mx-auto flex flex-col lg:flex-row lg:h-20 max-w-7xl items-center justify-between px-4 lg:px-8 py-4 lg:py-0 gap-4 lg:gap-0">
         {/* Top Row for Mobile (Logo + Controls) / Left Column for Desktop */}
-        <div className="flex w-full md:w-auto items-center justify-between md:justify-start gap-4">
+        <div className="flex w-full lg:w-auto items-center justify-between lg:justify-start gap-4">
           {/* Menu button (opens settings side menu) */}
           <button
-            onClick={onMenuClick}
+            // onClick={onMenuClick}
             className="flex items-center gap-2 rounded-full border border-border px-3.5 py-2.5 shadow-sm hover:shadow-md active:scale-97 transition-all cursor-pointer bg-card"
             aria-label="Open menu"
           >
             <Menu className="h-4 w-4 text-foreground" />
             {/* <h2>{avatar}</h2> */}
-            {/* {isLoggedIn && (
+            {/* {data && (
               <img
                 src={avatar}
                 alt="Account"
                 className="h-6 w-6 rounded-full object-cover hidden sm:block"
               />
             )} */}
-            <div className="flex justify-center items-center w-max font-semibold text-sm uppercase">
+            {/* <div className="flex justify-center items-center w-max font-semibold text-sm uppercase">
               {avatar}
-            </div>
+            </div> */}
           </button>
 
           {/* Logo */}
@@ -97,11 +115,11 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
 
           {/* Right Controls (Mobile Only) */}
-          <div className="flex md:hidden items-center gap-2">
-            {isLoggedIn ? (
+          <div className="flex lg:hidden items-center gap-2">
+            {data ? (
               <>
                 <button
-                  onClick={onBecomeHostClick}
+                  // onClick={onBecomeHostClick}
                   className="flex items-center gap-1.5 rounded-full bg-purple-950 text-white font-semibold py-2.5 px-4 text-xs shadow-md active:scale-97 transition-all cursor-pointer whitespace-nowrap"
                 >
                   Become a Host
@@ -117,7 +135,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               </>
             ) : (
               <button
-                onClick={onLoginClick}
+                onClick={() => setIsAuthModal(true)}
                 className="flex items-center gap-1.5 rounded-full bg-purple-950 text-white font-semibold py-2.5 px-4 text-xs shadow-md active:scale-97 transition-all cursor-pointer"
               >
                 <LogIn className="h-3.5 w-3.5" />
@@ -128,39 +146,52 @@ export const Navbar: React.FC<NavbarProps> = ({
         </div>
 
         {/* Center Tabs Control */}
-        <div className="flex w-full items-center justify-center md:w-auto">
-          <Tabs
-            value={activeTab}
-            onValueChange={(v) => setActiveTab(v as "location" | "planning")}
-            className="w-full md:w-87.5"
-          >
-            <TabsList className="grid w-full grid-cols-2 bg-transparent p-0">
-              <TabsTrigger
-                value="location"
-                className="cursor-pointer p-2.5 text-center text-sm font-medium tracking-tight transition-all hover:text-purple-950 data-active:bg-purple-900/10 data-active:text-purple-950"
-              >
-                Location
-              </TabsTrigger>
+        {!location.includes("host") && (
+          <div className="w-fit flex justify-center items-center gap-5 max-w-100">
+            <button
+              onClick={() => handleSetActive("all")}
+              className={`${isActive === "all" ? "border-purple-900 text-purple-950" : "border-transparent hover:text-purple-950"} cursor-pointer group py-3 flex justify-center items-center gap-2 text-xs xl:text-sm font-semibold transition-all border-b-2`}
+            >
+              <AllIcon
+                size={30}
+                className="group-hover:scale-110 ease transition-all duration-200"
+              />
+              <p className="text-[#222]">All</p>
+            </button>
 
-              <TabsTrigger
-                value="planning"
-                className="cursor-pointer p-2.5 text-center text-sm font-medium tracking-tight transition-all hover:text-purple-950 data-active:bg-purple-900/10 data-active:text-purple-950"
-              >
-                Planning something?
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
-        </div>
+            <button
+              onClick={() => handleSetActive("parties")}
+              className={`${isActive === "parties" ? "border-purple-900 text-purple-950" : "border-transparent hover:text-purple-950"} cursor-pointer group py-3 flex justify-center items-center gap-2 text-xs xl:text-sm font-semibold transition-all border-b-2`}
+            >
+              <PartiesIcon
+                size={30}
+                className="group-hover:scale-110 ease transition-all duration-200"
+              />
+              <p>Parties</p>
+            </button>
+
+            <button
+              onClick={() => handleSetActive("homes")}
+              className={`${isActive === "homes" ? "border-purple-900 text-purple-950" : "border-transparent hover:text-purple-950"} cursor-pointer group py-3 flex justify-center items-center gap-2 text-xs xl:text-sm font-semibold transition-all border-b-2`}
+            >
+              <HomeIcon
+                size={30}
+                className="group-hover:scale-110 ease transition-all duration-200"
+              />
+              <p>Homes</p>
+            </button>
+          </div>
+        )}
 
         {/* Right Controls (Desktop Only) */}
-        <div className="hidden md:flex items-center gap-3">
+        <div className="hidden lg:flex items-center gap-3">
           {/* Host / Guest account switcher when logged in */}
-          {isLoggedIn && (
+          {data && (
             <div className="flex items-center rounded-full border border-border bg-muted/40 p-1">
               <button
-                onClick={() => onSwitchView("guest")}
+                onClick={() => navigate("/")}
                 className={`flex items-center gap-1.5 rounded-full px-3.5 py-2 text-xs font-bold transition-all cursor-pointer ${
-                  viewMode === "guest"
+                  !location.includes("host")
                     ? "bg-purple-950 text-white shadow-sm"
                     : "text-muted-foreground hover:text-foreground"
                 }`}
@@ -169,9 +200,9 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <span>Guest</span>
               </button>
               <button
-                onClick={() => onSwitchView("host")}
+                onClick={() => navigate("/host")}
                 className={`flex items-center gap-1.5 rounded-full px-3.5 py-2 text-xs font-bold transition-all cursor-pointer ${
-                  viewMode === "host"
+                  location.includes("host")
                     ? "bg-purple-950 text-white shadow-sm"
                     : "text-muted-foreground hover:text-foreground"
                 }`}
@@ -182,7 +213,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             </div>
           )}
 
-          {isLoggedIn ? (
+          {data ? (
             <>
               {/* Avatar dropdown (Airbnb style) */}
               <div ref={menuRef} className="relative">
@@ -209,25 +240,27 @@ export const Navbar: React.FC<NavbarProps> = ({
                 {userMenuOpen && (
                   <div className="absolute right-0 top-[calc(100%+8px)] w-56 rounded-2xl border border-border bg-card shadow-xl p-2 origin-top animate-in fade-in zoom-in-95 duration-150 ease-out z-50">
                     <p className="px-3 py-2 text-xs font-bold text-muted-foreground truncate">
-                      Signed in as {userName || "guest"}
+                      Signed in as {data?.firstName || "guest"}
                     </p>
                     <div className="h-px bg-border/60 my-1" />
                     <button
                       onClick={() => {
                         setUserMenuOpen(false);
-                        onSwitchView(viewMode === "host" ? "guest" : "host");
+                        // onSwitchView(viewMode === "host" ? "guest" : "host");
                       }}
                       className="w-full flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm font-bold text-foreground hover:bg-muted transition-colors cursor-pointer"
                     >
                       <User className="h-4 w-4" />
                       <span>
-                        {viewMode === "host" ? "View as Guest" : "View as Host"}
+                        {location.includes("host")
+                          ? "View as Guest"
+                          : "View as Host"}
                       </span>
                     </button>
                     <button
                       onClick={() => {
                         setUserMenuOpen(false);
-                        onProfileClick();
+                        // onProfileClick();
                       }}
                       className="w-full flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm font-bold text-foreground hover:bg-muted transition-colors cursor-pointer"
                     >
@@ -237,7 +270,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                     <button
                       onClick={() => {
                         setUserMenuOpen(false);
-                        onMenuClick();
+                        // onMenuClick();
                       }}
                       className="w-full flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm font-bold text-foreground hover:bg-muted transition-colors cursor-pointer"
                     >
@@ -248,7 +281,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                     <button
                       onClick={() => {
                         setUserMenuOpen(false);
-                        onLogoutClick();
+                        // onLogoutClick();
                       }}
                       className="w-full flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm font-bold text-red-500 hover:bg-red-50 transition-colors cursor-pointer"
                     >
@@ -261,10 +294,11 @@ export const Navbar: React.FC<NavbarProps> = ({
             </>
           ) : (
             <button
-              onClick={onLoginClick}
-              className="flex items-center gap-2 rounded-full bg-purple-950 hover:bg-purple-900 dark:bg-purple-800 dark:hover:bg-purple-750 text-white font-medium py-2.5 px-6 shadow-md transition-all hover:scale-105 active:scale-95 duration-200 cursor-pointer"
+              onClick={() => setIsAuthModal(true)}
+              // className="flex items-center gap-2 rounded-full bg-purple-950 hover:bg-purple-900 dark:bg-purple-800 dark:hover:bg-purple-750 text-white font-medium py-2.5 px-6 shadow-md transition-all hover:scale-105 active:scale-95 duration-200 cursor-pointer"
+              className="font-semibold hover:text-purple-700 text-gray-800 duration-200 cursor-pointer"
             >
-              <LogIn className="h-4 w-4" />
+              {/* <LogIn className="h-4 w-4" /> */}
               <span className="text-sm">Log In</span>
             </button>
           )}

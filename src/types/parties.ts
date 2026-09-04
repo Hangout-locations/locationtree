@@ -1,0 +1,25 @@
+export type TParty = {
+  _id: string;
+  ownerId: string;
+  title: string;
+  description: string;
+  location: string;
+  images: [string];
+  rating?: number;
+  guest_capacity: string;
+  charge_type: string;
+  party_rules: string;
+  is_ticket_sales: boolean;
+  price: string;
+  beds: string;
+  bathrooms: string;
+  start_date: Date;
+  end_date: Date;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+export type TGroupedParties = {
+  caption: string;
+  parties: TParty[];
+};

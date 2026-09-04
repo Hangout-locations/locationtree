@@ -81,12 +81,12 @@ export const SearchHeader: React.FC<SearchHeaderProps> = ({
         {/* Where Input */}
         <div
           ref={dropdownRef}
-          className="relative flex-1 flex flex-col justify-center px-5 py-2.5 border-b md:border-b-0 md:border-r border-border/60 md:h-14"
+          className="relative flex-1 flex flex-col justify-center px-3 py-1 border-b md:border-b-0 md:border-r border-border/60 md:h-14"
         >
-          <label className="text-[10px] font-bold uppercase tracking-wider text-purple-950 dark:text-purple-300">
+          <label className="text-[10px] font-bold tracking-wider text-purple-950 dark:text-purple-300">
             Where
           </label>
-          <div className="flex items-center gap-1.5 mt-0.5">
+          <div className="flex items-center gap-1.5">
             <input
               type="text"
               placeholder="Search Destination"
@@ -112,7 +112,7 @@ export const SearchHeader: React.FC<SearchHeaderProps> = ({
           {/* Autocomplete Dropdown */}
           {showDropdown && (
             <div className="absolute left-0 right-0 md:right-auto md:w-80 top-[105%] z-50 mt-1.5 rounded-2xl border border-border bg-card p-2 shadow-xl origin-top animate-in fade-in zoom-in-95 slide-in-from-top-2 duration-150 ease-out">
-              <div className="text-[11px] font-bold text-muted-foreground px-3 py-1.5 uppercase tracking-wider">
+              <div className="text-[11px] font-bold text-muted-foreground px-3 py-1.5 tracking-wider">
                 Suggested Locations
               </div>
               {locations
@@ -143,12 +143,12 @@ export const SearchHeader: React.FC<SearchHeaderProps> = ({
 
         {/* Check In Date */}
         <div className="flex-1 flex flex-col justify-center px-5 py-2.5 border-b md:border-b-0 md:border-r border-border/60 md:h-14">
-          <label className="text-[10px] font-bold uppercase tracking-wider text-purple-950 dark:text-purple-300">
+          <label className="text-[10px] font-bold tracking-wider text-purple-950 dark:text-purple-300">
             Check in
           </label>
           <div
             onClick={() => openDatePicker(startDateRef)}
-            className="flex items-center gap-1.5 mt-0.5 relative"
+            className="flex items-center gap-1.5  relative"
           >
             <Calendar className="h-4 w-4 text-purple-600 pointer-events-none absolute left-0" />
             <input
@@ -164,12 +164,12 @@ export const SearchHeader: React.FC<SearchHeaderProps> = ({
 
         {/* Check Out Date */}
         <div className="flex-1 flex flex-col justify-center px-5 py-2.5 md:h-14 relative">
-          <label className="text-[10px] font-bold uppercase tracking-wider text-purple-950 dark:text-purple-300">
+          <label className="text-[10px] font-bold tracking-wider text-purple-950 dark:text-purple-300">
             Check out
           </label>
           <div
             onClick={() => openDatePicker(endDateRef)}
-            className="flex items-center gap-1.5 mt-0.5 relative"
+            className="flex items-center gap-1.5  relative"
           >
             <Calendar className="h-4 w-4 text-purple-600 pointer-events-none absolute left-0" />
             <input

@@ -3,7 +3,6 @@ import {
   HelpCircle,
   MapPin,
   Minus,
-  PartyPopper,
   Plus,
   SaveAllIcon,
   Ticket,
@@ -13,22 +12,24 @@ import {
 import type React from "react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Party_Types, SAMPLE_IMAGES } from "../data/constants";
-import type { Listing } from "../types/listing";
+import { Party_Types } from "../data/constants";
 import PartyStepThree from "./list-party/StepThree.party";
 import PartyStepTwo from "./list-party/StepTwo.party";
 import PartyStepFour from "./list-party/StepFour.party";
+import { formClient } from "../interceptors/http";
+import toast from "react-hot-toast";
 
 interface PartyWizardProps {
-  onAddListing: (listing: Listing) => void;
+  // onAddListing: (listing: Listing) => void;
 }
 
 type WizardStep = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
 
-export const PartyWizard: React.FC<PartyWizardProps> = ({ onAddListing }) => {
+export const PartyWizard: React.FC<PartyWizardProps> = () => {
   const [step, setStep] = useState<WizardStep>(1);
   const navigate = useNavigate();
 
+  const [loading, setLoading] = useState(false);
   const [photos, setPhotos] = useState<string[]>([]);
   const [partyType, setPartyType] = useState<string>("");
   const [startDate, setStartDate] = useState<string>("");
@@ -40,7 +41,7 @@ export const PartyWizard: React.FC<PartyWizardProps> = ({ onAddListing }) => {
   const [title, setTitle] = useState<string>("");
   const [activities, setActivities] = useState<string>("");
   const [rules, setRules] = useState<string>("");
-  const [ticketed, setTicketed] = useState<boolean>(true);
+  const [is_ticket_sales, setIsTicketsales] = useState<boolean>(true);
 
   const isDateValid = !!startDate && !!endDate && endDate >= startDate;
 
@@ -58,51 +59,44 @@ export const PartyWizard: React.FC<PartyWizardProps> = ({ onAddListing }) => {
 
   const handleExit = () => {
     if (window.confirm("Are you sure you want to save and exit?"))
-      navigate("/");
+      navigate("/host");
   };
 
   const handleSubmit = () => {
-    const normalizedLocation = ([
-      "Lekki",
-      "Lagos",
-      "surulere",
-      "Uyo",
-      "Enugu",
-    ].find((loc) => loc.toLowerCase() === location.trim().toLowerCase()) ||
-      "surulere") as "surulere" | "Enugu" | "Uyo" | "Lekki" | "Lagos";
+    setLoading(true);
 
-    const finalTitle =
-      title.trim() ||
-      `${partyType} in ${normalizedLocation}${priceMode === "person" ? ` — ${capacity} guests` : ""}`;
-
-    const newListing: Listing = {
-      id: `party-listing-${Date.now()}`,
-      title: finalTitle,
-      location: normalizedLocation,
-      category: partyType,
-      images: photos,
-      rating: 5.0,
-      reviewsCount: 0,
-      guestsCount: capacity,
-      price,
-      priceUnit: priceMode === "person" ? "person" : "hour",
-      bedroomsCount: 0,
-      bedsCount: 0,
-      hostingType: "party",
-      priceMode,
-      partyType,
-      startDate,
-      endDate,
-      activities,
-      rules,
-      description: activities,
-      ticketed,
-      isOwnedByUser: true,
-    };
-
-    onAddListing(newListing);
-    alert(`Congratulations! Your ${partyType} is now live on Hangout.`);
-    navigate("/");
+    formClient
+      .post("/parties", {
+        title,
+        description: activities,
+        location,
+        images: photos,
+        bedrooms: 1,
+        beds: 1,
+        bathrooms: 1,
+        guest_capacity: 1,
+        price,
+        charge_type: priceMode,
+        amenities: [],
+        start_date: startDate,
+        end_date: endDate,
+        party_rules: rules,
+        is_ticket_sales,
+      })
+      .then(() => {
+        toast.success("Party created successfully");
+        setTimeout(() => {
+          navigate("/host");
+        }, 3000);
+      })
+      .catch((err) => {
+        toast.error(
+          err?.response?.data?.message || "Error creating party, try again!",
+        );
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   };
 
   const isStepValid = () => {
@@ -382,9 +376,9 @@ export const PartyWizard: React.FC<PartyWizardProps> = ({ onAddListing }) => {
 
               <button
                 type="button"
-                onClick={() => setTicketed((prev) => !prev)}
+                onClick={() => setIsTicketsales((prev) => !prev)}
                 className={`w-full flex items-center gap-3 rounded-2xl border p-5 text-left transition-all cursor-pointer active:scale-97 ${
-                  ticketed
+                  is_ticket_sales
                     ? "border-purple-950 dark:border-purple-600 bg-purple-950/5 dark:bg-purple-800/15"
                     : "border-border/80 bg-card hover:border-gray-400"
                 }`}
@@ -401,7 +395,7 @@ export const PartyWizard: React.FC<PartyWizardProps> = ({ onAddListing }) => {
                 </div>
                 <span
                   className={`h-6 w-6 rounded-full border flex items-center justify-center text-[10px] font-semibold ${
-                    ticketed
+                    is_ticket_sales
                       ? "bg-purple-950 text-white border-purple-950"
                       : "border-border text-transparent"
                   }`}
@@ -468,7 +462,7 @@ export const PartyWizard: React.FC<PartyWizardProps> = ({ onAddListing }) => {
                     <Ticket className="h-3.5 w-3.5" /> Booking
                   </span>
                   <span className="text-foreground">
-                    {ticketed ? "Tickets required" : "Free RSVP"}
+                    {is_ticket_sales ? "Tickets required" : "Free RSVP"}
                   </span>
                 </div>
               </div>
@@ -499,10 +493,10 @@ export const PartyWizard: React.FC<PartyWizardProps> = ({ onAddListing }) => {
           <button
             type="button"
             onClick={handleNext}
-            disabled={!isStepValid()}
-            className="rounded-full bg-purple-950 hover:bg-purple-900 dark:bg-purple-800 dark:hover:bg-purple-750 text-white font-semibold py-3 px-6 text-sm shadow-md active:scale-97 transition-[transform,background-color] duration-160 ease-out disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
+            disabled={!isStepValid() || loading}
+            className="rounded-full ease disabled:cursor-not-allowed bg-purple-950 disabled:opacity-55 hover:bg-purple-900 dark:bg-purple-800 dark:hover:bg-purple-750 text-white font-semibold py-3 px-6 text-sm shadow-md active:scale-97 transition-[transform,background-color] duration-160 ease-out disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
           >
-            {step === 9 ? "Publish" : "Next"}
+            {step === 9 ? (loading ? "Publishing..." : "Publish") : "Next"}
           </button>
         </div>
       </footer>

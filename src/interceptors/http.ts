@@ -33,8 +33,12 @@ adminCaller.interceptors.request.use(
     }
     if (!token) {
       const currentLocation = window.location.pathname;
-
-      toast.error("Your session has expired. Please login again.");
+      // const toastId = toast.loading(
+      //   "Your session has expired. Please login again.",
+      // );
+      // setTimeout(() => {
+      //   toast.dismiss(toastId);
+      // }, 4000); // toast.error("Your session has expired. Please login again.");
       // window.location.href = `/login?redirect=${currentLocation}`;
     }
 
@@ -98,7 +102,7 @@ adminCaller.interceptors.response.use(
         const res = await axiosClient.post(
           `${import.meta.env.VITE_BASE_URL}/auth/refreshToken`,
           {
-            refreshToken,
+            // refreshToken,
             accessToken: sessionStorage.getItem("user_token"),
           },
         );
@@ -141,8 +145,11 @@ formClient.interceptors.request.use(
     }
     if (!token) {
       const currentLocation = window.location.pathname;
+      // const toastId = toast.loading(
+      //   "Your session has expired. Please login again.",
+      // );
+      // toast.dismiss(toastId);
 
-      toast.error("Your session has expired. Please login again.");
       // window.location.href = `/login?redirect=${currentLocation}`;
     }
 

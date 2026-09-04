@@ -3,14 +3,19 @@ import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import App from "./App.tsx";
 import ReactQueryProvider from "./components/provider/ReactQueryProvider.tsx";
+import { Toaster } from "react-hot-toast";
 import "./index.css";
+import AppProvider from "./components/provider/AppProvider.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <BrowserRouter>
-      <ReactQueryProvider>
-        <App />
-      </ReactQueryProvider>
+      <AppProvider>
+        <ReactQueryProvider>
+          <App />
+          <Toaster position="top-center" />
+        </ReactQueryProvider>
+      </AppProvider>
     </BrowserRouter>
   </StrictMode>,
 );
