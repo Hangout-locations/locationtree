@@ -50,7 +50,7 @@ export const HostDashboard: React.FC<HostDashboardProps> = ({
 
   return (
     <AppLayout>
-      <div className="mx-auto max-w-5xl px-4 md:px-8 py-8 space-y-8">
+      <div className="mx-auto max-w-3xl px-4 md:px-8 py-8 space-y-8">
         {/* Heading */}
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-3">

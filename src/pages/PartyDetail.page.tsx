@@ -258,7 +258,7 @@ const PartyDetailPage = () => {
                 onClick={() =>
                   alert("Booking requests will be available soon.")
                 }
-                className="mt-5 w-full rounded-xl bg-[#e85d4a] py-3.5 text-sm font-bold text-white transition hover:bg-[#d94f3d]"
+                className="mt-5 w-full rounded-xl bg-purple-500 py-3.5 text-sm font-bold text-white transition hover:bg-[#d94f3d]"
               >
                 Request to book
               </button>

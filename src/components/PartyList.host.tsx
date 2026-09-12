@@ -1,8 +1,9 @@
-import { Pencil, Trash2 } from "lucide-react";
-import type { IParty, Listing } from "../types/listing";
+import { EyeIcon, Pencil, Trash2 } from "lucide-react";
+import type { IParty } from "../types/listing";
 import { formatDate } from "../../lib/utils";
 import { useState } from "react";
 import { DeleteListingModal } from "./parties/DeleteListingModal";
+import { useNavigate } from "react-router-dom";
 
 interface IPartyListing {
   data: IParty[];
@@ -40,7 +41,15 @@ const ListingRow: React.FC<{
   listing: IParty;
   onDelete: (id: string) => void;
 }> = ({ listing, onDelete }) => {
-  const onEdit = () => {};
+  const navigate = useNavigate();
+
+  const onViewDetails = () => {
+    navigate(`/parties/${listing._id}`);
+  };
+
+  const onEdit = () => {
+    navigate(`/become-a-host/party?p=${listing._id}`);
+  };
 
   return (
     <div className="flex items-center gap-4 rounded-3xl border border-border bg-card p-4">
@@ -62,15 +71,23 @@ const ListingRow: React.FC<{
         </p>
       </div>
       <button
+        onClick={onViewDetails}
+        className="flex h-8 w-8 items-center justify-center rounded-full border border-border hover:bg-muted transition-colors cursor-pointer"
+        aria-label="Edit listing"
+      >
+        <EyeIcon className="h-4 w-4 text-foreground" />
+      </button>
+      <button
+        title="Edit party"
         onClick={onEdit}
-        className="flex h-10 w-10 items-center justify-center rounded-full border border-border hover:bg-muted transition-colors cursor-pointer"
+        className="flex h-8 w-8 items-center justify-center rounded-full border border-border hover:bg-muted transition-colors cursor-pointer"
         aria-label="Edit listing"
       >
         <Pencil className="h-4 w-4 text-foreground" />
       </button>
       <button
         onClick={() => onDelete(listing._id)}
-        className="flex h-10 w-10 items-center justify-center rounded-full border border-border text-red-500 hover:bg-red-50 transition-colors cursor-pointer"
+        className="flex h-8 w-8 items-center justify-center rounded-full border border-border text-red-500 hover:bg-red-50 transition-colors cursor-pointer"
         aria-label="Delete listing"
       >
         <Trash2 className="h-4 w-4" />

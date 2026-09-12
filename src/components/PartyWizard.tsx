@@ -10,14 +10,17 @@ import {
   Users,
 } from "lucide-react";
 import type React from "react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Party_Types } from "../data/constants";
 import PartyStepThree from "./list-party/StepThree.party";
 import PartyStepTwo from "./list-party/StepTwo.party";
 import PartyStepFour from "./list-party/StepFour.party";
-import { formClient } from "../interceptors/http";
+import { adminCaller, formClient } from "../interceptors/http";
 import toast from "react-hot-toast";
+import { useQuery } from "@tanstack/react-query";
+import PartyTypeSkeleton from "./parties/CreatePartySkeleton";
+import type { TParty } from "../types/parties";
 
 interface PartyWizardProps {
   // onAddListing: (listing: Listing) => void;
@@ -42,6 +45,19 @@ export const PartyWizard: React.FC<PartyWizardProps> = () => {
   const [activities, setActivities] = useState<string>("");
   const [rules, setRules] = useState<string>("");
   const [is_ticket_sales, setIsTicketsales] = useState<boolean>(true);
+  const searchParams = new URLSearchParams(window.location.search);
+  const partyId = searchParams.get("p");
+
+  const { data: partyData, isLoading } = useQuery<TParty>({
+    queryKey: [partyId],
+    queryFn: async () =>
+      await adminCaller
+        .get(`/parties/${partyId}`)
+        .then((res) => res.data?.data),
+    enabled: !!partyId,
+  });
+
+  console.log("partyData", partyData);
 
   const isDateValid = !!startDate && !!endDate && endDate >= startDate;
 
@@ -74,7 +90,7 @@ export const PartyWizard: React.FC<PartyWizardProps> = () => {
         bedrooms: 1,
         beds: 1,
         bathrooms: 1,
-        guest_capacity: 1,
+        guest_capacity: capacity,
         price,
         charge_type: priceMode,
         amenities: [],
@@ -82,6 +98,7 @@ export const PartyWizard: React.FC<PartyWizardProps> = () => {
         end_date: endDate,
         party_rules: rules,
         is_ticket_sales,
+        party_type: partyType,
       })
       .then(() => {
         toast.success("Party created successfully");
@@ -111,13 +128,32 @@ export const PartyWizard: React.FC<PartyWizardProps> = () => {
     return true;
   };
 
+  useEffect(() => {
+    if (partyData) {
+      setTitle(partyData?.title);
+      setStartDate(partyData?.start_date as any);
+      setEndDate(partyData?.end_date as any);
+      setPartyType(partyData?.party_type as any);
+      setLocation(partyData?.location);
+      setPhotos(partyData?.images);
+      setPrice(Number(partyData?.price));
+      setPriceMode(partyData?.charge_type);
+      setActivities(partyData?.description);
+      setRules(partyData?.party_rules);
+    }
+  }, [partyData]);
+
+  if (partyId && isLoading) {
+    return <PartyTypeSkeleton />;
+  }
+
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground transition-colors duration-300 relative">
       {/* Wizard Header */}
       <header className="sticky top-0 z-45 w-full border-b border-border bg-background/95 backdrop-blur-md px-4 py-4 md:px-8 flex items-center justify-between">
         <div
           className="flex items-center h-12 max-w-37.5 cursor-pointer"
-          onClick={() => navigate("/")}
+          onClick={() => navigate("/host?p=listings")}
         >
           <img
             src="/images/logo.png"
@@ -147,10 +183,10 @@ export const PartyWizard: React.FC<PartyWizardProps> = () => {
       {/* Progress Bar Indicator */}
       <div className="w-full bg-muted h-1 fixed z-10 top-20 right-0 left-0">
         <div
-          className="h-full rounded-full bg-gradient-to-r from-violet-600 via-purple-500 to-fuchsia-500 shadow-[0_0_10px_rgba(139,92,246,0.45)] transition-all duration-500 ease-out relative overflow-hidden"
+          className="h-full rounded-full bg-linear-to-r from-violet-600 via-purple-500 to-fuchsia-500 shadow-[0_0_10px_rgba(139,92,246,0.45)] transition-all duration-500 ease-out relative overflow-hidden"
           style={{ width: `${(step / 12) * 100}%` }}
         >
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent animate-[shimmer_2s_infinite]" />
+          <div className="absolute inset-0 bg-linear-to-r from-transparent via-white/25 to-transparent animate-[shimmer_2s_infinite]" />
         </div>
       </div>
 
@@ -494,9 +530,17 @@ export const PartyWizard: React.FC<PartyWizardProps> = () => {
             type="button"
             onClick={handleNext}
             disabled={!isStepValid() || loading}
-            className="rounded-full ease disabled:cursor-not-allowed bg-purple-950 disabled:opacity-55 hover:bg-purple-900 dark:bg-purple-800 dark:hover:bg-purple-750 text-white font-semibold py-3 px-6 text-sm shadow-md active:scale-97 transition-[transform,background-color] duration-160 ease-out disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
+            className="rounded-full ease disabled:cursor-not-allowed bg-purple-950 disabled:opacity-55 hover:bg-purple-900 dark:bg-purple-800 dark:hover:bg-purple-750 text-white font-semibold py-3 px-6 text-sm shadow-md active:scale-97 transition-[transform,background-color] duration-160 ease-out disabled:pointer-events-none cursor-pointer"
           >
-            {step === 9 ? (loading ? "Publishing..." : "Publish") : "Next"}
+            {step === 9
+              ? loading
+                ? partyData
+                  ? "Updating..."
+                  : "Publishing..."
+                : partyData
+                  ? "Update"
+                  : "Publish"
+              : "Next"}
           </button>
         </div>
       </footer>

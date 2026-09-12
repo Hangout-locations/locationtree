@@ -1,8 +1,18 @@
-import { Heart, HeartIcon, Star } from "lucide-react";
+import { HeartIcon, Star } from "lucide-react";
 import type React from "react";
 import { displayPrice, formatPrice } from "../../lib/currency";
 import type { TParty } from "../../types/parties";
 import { useNavigate } from "react-router-dom";
+import useAuth from "../hooks/useAuth";
+import useAppContext from "../hooks/useAppContext";
+import { adminCaller } from "../../interceptors/http";
+import { useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  favoritesQueryKey,
+  getFavorites,
+  removeFavorite,
+} from "../../lib/favorites";
 
 interface PartyListCardProps {
   party: TParty;
@@ -13,11 +23,35 @@ export const PartyListCard: React.FC<PartyListCardProps> = ({
   party,
   index,
 }) => {
-  const isWishlisted = false;
+  const [loading, setLoading] = useState("");
   const navigate = useNavigate();
+  const { data } = useAuth();
+  const qc = useQueryClient();
+  const { setIsAuthModal } = useAppContext();
+
+  const handleFavorite = () => {
+    if (data) {
+      setLoading(party._id);
+
+      const request = party?.isFavorite
+        ? removeFavorite(party._id)
+        : adminCaller.post("/favorites", {
+            targetId: party._id,
+            targetType: "Party",
+          });
+
+      request
+        .then(() => qc.invalidateQueries({ queryKey: favoritesQueryKey }))
+        .finally(() => setLoading(""));
+      return;
+    }
+
+    setIsAuthModal(true);
+  };
 
   return (
-    <button
+    <div
+      role="button"
       onClick={() => navigate(`/parties/${party._id}`)}
       className="rounded-xl group relative flex flex-col animate-listing-entranc cursor-pointer"
       style={{
@@ -47,16 +81,17 @@ export const PartyListCard: React.FC<PartyListCardProps> = ({
             onClick={(e) => {
               e.stopPropagation();
               e.preventDefault();
-              // onWishlistToggle(party._id);
+              handleFavorite();
             }}
-            className="absolute top-3 right-3 z-10 dark:bg-black/40 transition-[transform,background-color] duration-160 ease-out dark:hover:bg-black/60 hover:scale-110"
+            disabled={loading === party?._id}
+            className="disabled:opacity-40 disabled:cursor-not-allowed absolute top-3 right-3 z-10 dark:bg-black/40 transition-[transform,background-color] duration-160 ease-out dark:hover:bg-black/60 hover:scale-110"
             aria-label={
-              isWishlisted ? "Remove from wishlist" : "Add to wishlist"
+              party?.isFavorite ? "Remove from wishlist" : "Add to wishlist"
             }
           >
             <HeartIcon
               className={`cursor-pointer h-6 w-6 fill-gray-700 text-white transition-[transform,colors] duration-200 ease-out ${
-                isWishlisted
+                party?.isFavorite
                   ? "fill-red-500 text-red-500 scale-110 drop-shadow-[0_0_4px_rgba(239,68,68,0.5)]"
                   : "text-gray-700 dark:text-gray-300"
               }`}
@@ -98,6 +133,6 @@ export const PartyListCard: React.FC<PartyListCardProps> = ({
           {/* Price and Action button */}
         </div>
       </div>
-    </button>
+    </div>
   );
 };

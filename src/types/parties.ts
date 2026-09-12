@@ -7,7 +7,7 @@ export type TParty = {
   images: [string];
   rating?: number;
   guest_capacity: string;
-  charge_type: string;
+  charge_type: "person" | "hour";
   party_rules: string;
   is_ticket_sales: boolean;
   price: string;
@@ -17,6 +17,8 @@ export type TParty = {
   end_date: Date;
   createdAt: Date;
   updatedAt: Date;
+  party_type: string;
+  isFavorite?: boolean;
 };
 
 export type TGroupedParties = {

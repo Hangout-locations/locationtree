@@ -13,3 +13,14 @@ export const formatDate = (date: string) => {
     year: "numeric",
   });
 };
+
+export const formatDateShort = (date: Date | undefined) => {
+  if (!date) return "";
+
+  const newDate = new Date(date as Date);
+
+  return newDate.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+  });
+};

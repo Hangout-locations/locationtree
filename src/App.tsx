@@ -9,7 +9,7 @@ import { ProfilePage } from "./components/ProfilePage";
 import { SupportPage } from "./components/SupportPage";
 import { TripsPage } from "./components/TripsPage";
 import { WalletView } from "./components/WalletView";
-import { WishlistPage } from "./components/WishlistPage";
+import { FavoritesPage } from "./components/FavoritesPage";
 import { locationListings, planningListings } from "./data/listings";
 import type { CurrencyCode } from "./lib/currency";
 import { loadState } from "./lib/storage";
@@ -204,18 +204,8 @@ function App() {
           />
         }
       />
-      <Route
-        path="/wishlist"
-        element={
-          <WishlistPage
-            listings={listingsList}
-            wishlist={wishlist}
-            onWishlistToggle={handleWishlistToggle}
-            onListingClick={(listing) => navigate(`/listing/${listing.id}`)}
-            currency={currency}
-          />
-        }
-      />
+      <Route path="/favorites" element={<FavoritesPage />} />
+      <Route path="/wishlist" element={<FavoritesPage />} />
       <Route
         path="/trips"
         element={<TripsPage bookings={bookings} currency={currency} />}
