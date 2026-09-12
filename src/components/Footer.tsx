@@ -3,15 +3,9 @@ import type React from "react";
 import { SiFacebook, SiInstagram, SiX } from "react-icons/si";
 import type { CurrencyCode } from "../lib/currency";
 
-interface FooterProps {
-  currency: CurrencyCode;
-  onCurrencyClick: () => void;
-}
+interface FooterProps {}
 
-export const Footer: React.FC<FooterProps> = ({
-  currency,
-  onCurrencyClick,
-}) => {
+export const Footer: React.FC<FooterProps> = ({}) => {
   return (
     <footer className="w-full border-t border-border bg-muted/30 pt-12 pb-8 transition-colors duration-300">
       <div className="mx-auto max-w-7xl px-4 md:px-8">
