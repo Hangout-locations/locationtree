@@ -8,6 +8,7 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
       <Navbar />
       <main className="grow">{children}</main>
       <Footer
+      
 
       //   currency={currency}
       //   onCurrencyClick={() => setCurrencyOpen(true)}
