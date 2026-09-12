@@ -53,22 +53,21 @@ export const SignUp: React.FC<AuthModalProps> = ({ setScreen, onClose }) => {
         bio,
       })
       .then((res) => {
+        toast.success("Your account is registered successfully");
         sessionStorage.setItem("user_token", res.data?.accessToken);
         sessionStorage.setItem("hangaut_user", JSON.stringify(res.data?.user));
-        toast.success("You are in, enjoy your session");
         if (onClose) {
           onClose();
         }
         setTimeout(() => {
           window.location.reload();
         }, 1000);
-        toast.success("Your account is registered successfully");
         if (onClose) {
           onClose();
         }
       })
       .catch((err) => {
-        toast.success(err?.response?.data?.message || "Error registering in");
+        toast.error(err?.response?.data?.message || "Error registering in");
       })
       .finally(() => setLoading(false));
   };

@@ -1,6 +1,6 @@
 import { Navbar } from "../Navbar";
 import { AuthModal } from "../AuthModal";
-import { Footer } from "react-day-picker";
+import { Footer } from "../Footer";
 
 const AppLayout = ({ children }: { children: React.ReactNode }) => {
   return (
@@ -37,7 +37,6 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
       // currency={currency}
       // callbacks={menuCallbacks}
       /> */}
-      {/* <Footer /> */}
     </div>
   );
 };

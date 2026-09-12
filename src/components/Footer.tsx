@@ -255,7 +255,7 @@ export const Footer: React.FC<FooterProps> = ({
             {/* Lang & Currency selection mockup */}
             <div className="flex items-center gap-4">
               <button
-                onClick={onCurrencyClick}
+                // onClick={onCurrencyClick}
                 className="flex items-center gap-1.5 hover:text-foreground transition-colors cursor-pointer focus:outline-none"
                 aria-label="Choose currency"
               >
@@ -263,12 +263,12 @@ export const Footer: React.FC<FooterProps> = ({
                 <span>English (US)</span>
               </button>
               <button
-                onClick={onCurrencyClick}
+                // onClick={onCurrencyClick}
                 className="flex items-center gap-1 hover:text-foreground transition-colors cursor-pointer focus:outline-none"
                 aria-label="Choose currency"
               >
                 <DollarSign className="h-4 w-4" />
-                <span>{currency}</span>
+                {/* <span>{currency}</span> */}
               </button>
             </div>
 
